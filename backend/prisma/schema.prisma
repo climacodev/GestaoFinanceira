@@ -1,0 +1,105 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  password      String
+  name          String
+  plan          String          @default("FREE") // FREE, PREMIUM
+  accounts      Account[]
+  creditCards   CreditCard[]
+  transactions  Transaction[]
+  goals         FinancialGoal[]
+  notifications Notification[]
+  insights      AiInsight[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         String        // CHECKING, SAVINGS, WALLET, INVESTMENT
+  balance      Float         @default(0.0)
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model CreditCard {
+  id           Int           @id @default(autoincrement())
+  name         String
+  limit        Float
+  closingDay   Int
+  dueDay       Int
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id                Int         @id @default(autoincrement())
+  description       String
+  amount            Float
+  date              DateTime
+  type              String      // INCOME, EXPENSE
+  category          String      // FOOD, TRANSPORT, HEALTH, LEISURE, SALARY, INVESTMENT, UTILITIES, OTHERS
+  subcategory       String?
+  status            String      @default("PAID") // PAID, PENDING
+  isRecurring       Boolean     @default(false)
+  recurrencePeriod  String?     // MONTHLY, WEEKLY
+  isInstallment     Boolean     @default(false)
+  installmentNumber Int?
+  totalInstallments Int?
+  attachmentUrl     String?
+  userId            Int
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId         Int?
+  account           Account?    @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  creditCardId      Int?
+  creditCard        CreditCard? @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model FinancialGoal {
+  id           Int       @id @default(autoincrement())
+  name         String
+  targetAmount Float
+  currentAmount Float     @default(0.0)
+  deadline     DateTime?
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AiInsight {
+  id        Int      @id @default(autoincrement())
+  text      String
+  type      String   // TIP, WARNING, SUGGESTION
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}

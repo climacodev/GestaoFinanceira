@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: contable_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: contable_admin
+      POSTGRES_PASSWORD: contable_secure_password
+      POSTGRES_DB: contable_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: contable_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: contable_backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://contable_admin:contable_secure_password@db:5432/contable_database?schema=public
+      - JWT_SECRET=super-secret-key-12345
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: contable_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  redisdata:

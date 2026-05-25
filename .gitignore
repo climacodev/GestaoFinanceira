@@ -1,0 +1,39 @@
+# Dependency directories
+**/node_modules/
+node_modules/
+
+# Next.js build output
+**/build/
+**/.next/
+out/
+
+# NestJS build output
+**/dist/
+
+# Local databases
+**/*.db
+**/*.db-journal
+
+# Environment secrets
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+
+# Expo
+**/.expo/
+*.jks
+*.p8
+*.mobileprovision
+
+# OS files
+.DS_Store
+**/Thumbs.db
+**/__pycache__/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+_logs/
